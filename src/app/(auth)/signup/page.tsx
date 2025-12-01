@@ -1,9 +1,9 @@
-import { LoginForm } from "@/features/auth/components/login-form";
+import { SignupForm } from "@/features/auth/components/signup-form"
 
 const Page = () => {
     return (
         <div>
-            <LoginForm />
+        <SignupForm />
         </div>
     )
 }
