@@ -1,10 +1,11 @@
 
-export default function Home() {
-  
 
+const Page = async () => {
   return (
-    <div>
-      HOE
+    <div className="min-h-screen min-w-screen flex items-center justofy-center">
     </div>
-  );
+  )
 }
+
+
+export default Page;
