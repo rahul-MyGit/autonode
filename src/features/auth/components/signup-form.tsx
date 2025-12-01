@@ -39,7 +39,20 @@ export function SignupForm() {
     });
 
     const onSubmit = async (values: SignupFormValue) => {
-        console.log(values);
+        const res = await authClient.signUp.email({
+            name: values.email,
+            email: values.email,
+            password: values.password,
+            callbackURL: "/"
+        }, {
+            onSuccess: () => {
+                router.push("/")
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message)
+            }
+        });
+        console.log("res", res)
     }
 
     const isPending = form.formState.isSubmitting;
