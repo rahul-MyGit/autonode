@@ -1,5 +1,6 @@
 export const CONFIG = {
     PORT: process.env.PORT || 3003,
+    NODE_ENV: process.env.NODE_ENV || "development",
     JWT_SECRET: process.env.JWT_SECRET || "secret",
     DATABASE_URL: process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/postgres",
     AUTH_SECRET: {

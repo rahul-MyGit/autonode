@@ -1,38 +1,35 @@
 import { ApiResponse, asyncHandler, CustomError } from "@n8n/auth";
 import type { Request, Response } from "express";
 import { authService } from "../service/auth.service";
+import { generateCookieOptions } from "../config/cookie";
 
 export const signup = asyncHandler(async (req: Request, res: Response) => {
-    const {email, password, name} = req.body;
+    const { email, password, name } = req.body;
 
     try {
-    const userId = await authService.signup(email, password, name);
-    res.status(201).json(new ApiResponse(201, "User created successfully", userId));
+        const userId = await authService.signup(email, password, name);
+        res.status(201).json(new ApiResponse(201, "User created successfully", userId));
 
     } catch (error: any) {
-
-        if(error.message === "User already exists") {
+        if (error.message === "User already exists") {
             throw new CustomError(400, error.message);
         }
         throw new CustomError(500, "Failed to create user");
-
     }
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     try {
-
-        const user = await authService.login(email, password);
-        res.status(200).json(new ApiResponse(200, "Login successful", user));
+        const { user, accessToken, refreshToken } = await authService.login(email, password);
+        res.status(200).cookie("accessToken", accessToken, generateCookieOptions()).cookie("refreshToken", refreshToken, generateCookieOptions()).json(new ApiResponse(200, "Login successful", user));
 
     } catch (error: any) {
-        if(error.message === "Invalid credentials") {
+        if (error.message === "Invalid credentials") {
             throw new CustomError(401, error.message);
         }
         throw new CustomError(500, "Failed to login");
-
     }
 });
 

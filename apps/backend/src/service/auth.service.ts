@@ -15,11 +15,11 @@ export class AuthService {
     }
 
     generateAccessToken(user: User) {
-        return jwt.sign({id: user.id, email: user.email}, CONFIG.AUTH_SECRET.ACCESS_TOKEN_SECRET, {expiresIn: CONFIG.AUTH_SECRET.ACCESS_TOKEN_EXPIRY as StringValue});
+        return jwt.sign({ id: user.id, email: user.email }, CONFIG.AUTH_SECRET.ACCESS_TOKEN_SECRET, { expiresIn: CONFIG.AUTH_SECRET.ACCESS_TOKEN_EXPIRY as StringValue });
     }
 
     generateRefreshToken(user: User) {
-        return jwt.sign({id: user.id, email: user.email}, CONFIG.AUTH_SECRET.REFRESH_TOKEN_SECRET, {expiresIn: CONFIG.AUTH_SECRET.REFRESH_TOKEN_EXPIRY as StringValue});
+        return jwt.sign({ id: user.id, email: user.email }, CONFIG.AUTH_SECRET.REFRESH_TOKEN_SECRET, { expiresIn: CONFIG.AUTH_SECRET.REFRESH_TOKEN_EXPIRY as StringValue });
     }
 
     createHash(token: string) {
@@ -27,8 +27,8 @@ export class AuthService {
     }
 
     async signup(email: string, password: string, name: string) {
-        const user = await prisma.user.findUnique({where: {email}});
-        if(user) {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (user) {
             throw new Error("User Already exist")
         }
         const hashedPassword = await this.hashPassword(password);
@@ -43,12 +43,12 @@ export class AuthService {
     }
 
     async login(email: string, password: string) {
-        const user = await prisma.user.findUnique({where: {email}});
-        if(!user) {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
             throw new Error("User not found");
         }
         const isPasswordCorrect = await this.comparePassword(password, user.password!);
-        if(!isPasswordCorrect) {
+        if (!isPasswordCorrect) {
             throw new Error("Invalid credentials");
         }
 
@@ -62,13 +62,22 @@ export class AuthService {
         const updatedUser = await prisma.user.update({
             where: { email },
             data: { refreshToken: hashedRefreshToken, refreshTokenExpiry: expiresAt },
-          });
-      
-          return {
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                refreshToken: true,
+                refreshTokenExpiry: true,
+                createdAt: true,
+                updatedAt: true,
+            }
+        });
+
+        return {
             user: updatedUser,
             accessToken,
             refreshToken,
-          };
+        };
     }
 }
 
