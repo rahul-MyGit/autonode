@@ -26,19 +26,27 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
         res.status(200).cookie("accessToken", accessToken, generateCookieOptions()).cookie("refreshToken", refreshToken, generateCookieOptions()).json(new ApiResponse(200, "Login successful", user));
 
     } catch (error: any) {
-        if (error.message === "Invalid credentials") {
-            throw new CustomError(401, error.message);
-        }
-        throw new CustomError(500, "Failed to login");
+        throw new CustomError(400, error.message || "Invalid credentials");
     }
 });
 
 export const getUser = asyncHandler(async (req: Request, res: Response) => {
-    res.send("Get User");
+    const userId = req.user?.id;
+    if (!userId) throw new CustomError(401, "UserId not found");
+
+    try {   
+        const user = await authService.getUser(userId);
+        res.status(200).json(new ApiResponse(200, "User fetched successfully", user));
+    } catch (error: any) {
+        throw new CustomError(400, error.message || "Failed to fetch user");
+    }
+
 });
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
-    res.send("Logout");
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.status(200).json(new ApiResponse(200, "Logged out successfully", null));
 });
 
 export const googleVerify = asyncHandler(async (req: Request, res: Response) => {

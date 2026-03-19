@@ -79,6 +79,20 @@ export class AuthService {
             refreshToken,
         };
     }
+
+    async getUser(userId: number) {
+        const user = await prisma.user.findFirst({ where: { id: userId } , select: {
+            id: true,
+            email: true,
+            name: true,
+            createdAt: true,
+            updatedAt: true,
+            refreshToken: true,
+            refreshTokenExpiry: true,
+        } });
+        if (!user) throw new Error("User not found");
+        return user;
+    }
 }
 
 export const authService = new AuthService();
