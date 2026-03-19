@@ -1,4 +1,4 @@
-import type { User } from "@n8n/auth";
+import type { User } from "@n8n/db";
 
 export type decodedUser = Pick<User, "id" | "email" | "name">;
 
