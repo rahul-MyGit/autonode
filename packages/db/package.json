@@ -6,8 +6,8 @@
   "types": "./db.ts",
   "private": true,
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
-    "start": "bun run src/index.ts"
+    "dev": "bun run --watch db.ts",
+    "start": "bun run db.ts"
   },
   "exports": {
     ".": "./db.ts"
@@ -21,6 +21,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@n8n/config": "*",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "pg": "^8.20.0"

@@ -6,14 +6,16 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
     const {email, password, name} = req.body;
 
     try {
-        
     const userId = await authService.signup(email, password, name);
     res.status(201).json(new ApiResponse(201, "User created successfully", userId));
+
     } catch (error: any) {
+
         if(error.message === "User already exists") {
             throw new CustomError(400, error.message);
         }
         throw new CustomError(500, "Failed to create user");
+
     }
 });
 
