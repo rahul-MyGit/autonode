@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { CustomError } from "@n8n/auth";
 import jwt, { TokenExpiredError } from "jsonwebtoken";
-import { ENV } from "../config/env";
+import CONFIG from "@n8n/config";
 import type { decodedUser } from "../config/express";
 
 export const isProtected = (req: Request, res: Response, next: NextFunction) => {
@@ -9,7 +9,7 @@ export const isProtected = (req: Request, res: Response, next: NextFunction) => 
     if (!accessToken) throw new CustomError(401, "No Access Token in middleware");
 
     try {
-        const decoded = jwt.verify(accessToken, ENV.JWT_SECRET);
+        const decoded = jwt.verify(accessToken, CONFIG.JWT_SECRET);
         req.user = decoded as decodedUser;
         next();
     } catch (error) {
