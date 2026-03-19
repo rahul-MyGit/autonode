@@ -21,4 +21,24 @@ model User {
   refreshTokenExpiry DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  workflows Workflow[]
+}
+
+model Workflow {
+  id    Int     @id @default(autoincrement()) 
+  name   String
+  description String?
+
+  active Boolean
+  tags   String[]
+  nodes Json[]
+  edges Json[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  userId Int
+  user User @relation(fields: [userId], references: [id])
 }
