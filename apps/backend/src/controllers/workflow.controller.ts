@@ -3,7 +3,15 @@ import type { Request, Response } from "express";
 import { workflowService } from "../service/workflow.service";
 
 export const saveWorkflow = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    if(!userId) throw new CustomError(401, "User not found");
 
+    try {
+        const workflow = await workflowService.saveWorkflow(userId, req.body);
+        res.status(200).json(new ApiResponse(200, "Workflow saved successfully", workflow));
+    } catch (error: any) {
+        throw new CustomError(500, error.message || "Failed to save workflow");
+    }
 });
 
 export const getWorkflow = asyncHandler(async (req: Request, res: Response) => {

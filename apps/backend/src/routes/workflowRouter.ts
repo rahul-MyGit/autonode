@@ -5,7 +5,7 @@ import { saveWorkflow, getWorkflow, getWorkflowById, updateWorkflowById, deleteW
 const router = Router();
 
 router.post("/save", isProtected, saveWorkflow);
-router.get("/", isProtected, getWorkflow);
+router.get("/", isProtected, getWorkflow);    //DONE
 router.get(":/id" , isProtected, getWorkflowById);
 router.put(":/id" , isProtected, updateWorkflowById);
 router.delete(":/id" , isProtected, deleteWorkflowById);
