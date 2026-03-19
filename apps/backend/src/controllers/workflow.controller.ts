@@ -27,7 +27,21 @@ export const getWorkflow = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getWorkflowById = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    if(!userId) throw new CustomError(401, "User not found");
 
+    const {id} = req.params;
+    if(!id || isNaN(Number(id))) throw new CustomError(400, "Invalid workflow ID");
+    const workflowId = Number(id);
+
+    try {
+        const workflow = await workflowService.getWorkflowById(workflowId, userId);
+        if(!workflow) throw new CustomError(404, "Workflow not found");
+        
+        res.status(200).json(new ApiResponse(200, "Workflow fetched successfully", workflow));
+    } catch (error: any) {
+        throw new CustomError(500, error.message || "Failed to fetch workflow");
+    }
 });
 
 export const updateWorkflowById = asyncHandler(async (req: Request, res: Response) => {
