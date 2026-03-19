@@ -20,7 +20,20 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
-    res.send("Login");
+    const {email, password} = req.body;
+
+    try {
+
+        const user = await authService.login(email, password);
+        res.status(200).json(new ApiResponse(200, "Login successful", user));
+
+    } catch (error: any) {
+        if(error.message === "Invalid credentials") {
+            throw new CustomError(401, error.message);
+        }
+        throw new CustomError(500, "Failed to login");
+
+    }
 });
 
 export const getUser = asyncHandler(async (req: Request, res: Response) => {

@@ -11,7 +11,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19"
+    "@types/cors": "^2.8.19",
+    "@types/ms": "^2.1.0"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -22,6 +23,8 @@
     "@n8n/db": "*",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.6"
+    "cors": "^2.8.6",
+    "crypto": "^1.0.1",
+    "ms": "^2.1.3"
   }
 }
