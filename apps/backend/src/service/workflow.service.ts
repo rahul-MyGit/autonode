@@ -1,7 +1,20 @@
 import { prisma } from "@n8n/db";
 import { workflowQueue } from "@n8n/queue";
+import { connectToRedis, createRedisClient } from "@n8n/redis";
 import { workflowSchema } from "@n8n/zod";
 import { v4 as uuidv4 } from 'uuid';
+
+const publishToRedis = createRedisClient()
+
+async function connectRedis() {
+    try {
+        await connectToRedis(publishToRedis);
+    } catch (error) {
+        console.error("ERROR CONNECTING TO REDIS", error);
+    }
+}
+
+connectRedis()
 
 export class WorkflowService {
 
@@ -115,7 +128,13 @@ export class WorkflowService {
             removeOnFail: 5000,
         });
 
-        //TODO: push to redis
+        await publishToRedis.hSet(`execution-jobs:${executionJobId}`, {
+            status: "queued",
+            createdAt: new Date().toISOString(),
+            workflowId: workflow.id,
+            userId,
+          });
+        await publishToRedis.expire(`execution-jobs:${executionJobId}`, 86400);
 
         return {
             executionJobId,
