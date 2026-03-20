@@ -54,7 +54,7 @@ enum ExecutionStatus {
 }
 
 model WorkflowExecution {
-  id           Int             @id @default(autoincrement())
+  id           String          @id @default(cuid())
   workflowId   Int
   workflowName String
   userId       Int
