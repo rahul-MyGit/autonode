@@ -80,3 +80,24 @@ export const deleteWorkflowById = asyncHandler(async (req: Request, res: Respons
         throw new CustomError(500, error.message || "Failed to delete workflow");
     }
 });
+
+export const executeWorkflow = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    if(!userId) throw new CustomError(401, "User not found");
+
+    const {id} = req.params;
+    if(!id || isNaN(Number(id))) throw new CustomError(400, "Invalid workflow ID");
+    const workflowId = Number(id);
+
+    let metadata = {
+        source: "api",
+        timestamp: new Date().toISOString(),  //TODO: Later put at trace
+    }
+
+    try {
+        const executedWorkflow = await workflowService.executeWorkflow(workflowId, userId, metadata);
+        res.status(200).json(new ApiResponse(200, "Workflow executed successfully", executedWorkflow));
+    } catch (error: any) {
+        throw new CustomError(500, error.message || "Failed to execute workflow");
+    }
+})

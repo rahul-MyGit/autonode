@@ -1,5 +1,6 @@
 import { prisma } from "@n8n/db";
 import { workflowSchema } from "@n8n/zod";
+import { v4 as uuidv4 } from 'uuid';
 
 export class WorkflowService {
 
@@ -83,6 +84,38 @@ export class WorkflowService {
             createdAt: deletedWorkflow.createdAt,
             updatedAt: deletedWorkflow.updatedAt,
             deletedAt: deletedWorkflow.deletedAt
+        }
+    }
+
+    async executeWorkflow(workflowId: number, userId: number, metadata: any) {
+        const workflow = await this.getWorkflowById(workflowId, userId);
+
+        let executionJobId = uuidv4();
+        let executionJobData = {
+            executionJobId,
+            userId,
+            triggerBy: "manual",
+            triggerAt: new Date().toISOString(),
+            status: "QUEUED",
+            priority: "NORMAL",
+            workflow : {
+                id: workflow.id,
+                name: workflow.name,
+                nodes: workflow.nodes,
+                edges: workflow.edges,
+                active: workflow.active,
+            },
+            metadata,
+        }
+        //TODO: push to QUEUE
+
+        //TODO: push to redis
+
+        return {
+            executionJobId,
+            id: workflow.id,
+            status: executionJobData.status,
+            priority: executionJobData.priority,
         }
     }
 }
