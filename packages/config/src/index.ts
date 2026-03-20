@@ -1,5 +1,5 @@
 export const CONFIG = {
-    PORT: process.env.PORT || 3003,
+    PORT: Number(process.env.PORT) || 3003,
     NODE_ENV: process.env.NODE_ENV || "development",
     JWT_SECRET: process.env.JWT_SECRET || "secret",
     DATABASE_URL: process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/postgres",
@@ -8,6 +8,11 @@ export const CONFIG = {
         REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || "refresh_token_secret",
         ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY || "1h",
         REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY || "7d",
+    },
+    REDIS: {
+        URL: process.env.REDIS_URL || "redis://localhost:6379",
+        HOST: process.env.REDIS_HOST || "localhost",
+        PORT: Number(process.env.REDIS_PORT) || 6379,
     }
 }
 

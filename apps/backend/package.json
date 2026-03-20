@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@n8n/auth": "*",
+    "@n8n/queue": "*",
     "@n8n/config": "*",
     "@n8n/db": "*",
     "@n8n/zod": "*",

@@ -1,4 +1,5 @@
 import { prisma } from "@n8n/db";
+import { workflowQueue } from "@n8n/queue";
 import { workflowSchema } from "@n8n/zod";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -107,7 +108,12 @@ export class WorkflowService {
             },
             metadata,
         }
-        //TODO: push to QUEUE
+
+        await workflowQueue.add("execute-workflow", executionJobData, {
+            jobId: executionJobId,
+            removeOnComplete: 1000,
+            removeOnFail: 5000,
+        });
 
         //TODO: push to redis
 
