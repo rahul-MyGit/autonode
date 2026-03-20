@@ -4,7 +4,7 @@ import { workflowService } from "../service/workflow.service";
 
 export const saveWorkflow = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    if(!userId) throw new CustomError(401, "User not found");
+    if (!userId) throw new CustomError(401, "User not found");
 
     try {
         const workflow = await workflowService.saveWorkflow(userId, req.body);
@@ -16,7 +16,7 @@ export const saveWorkflow = asyncHandler(async (req: Request, res: Response) => 
 
 export const getWorkflow = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    if(!userId) throw new CustomError(401, "User not found");
+    if (!userId) throw new CustomError(401, "User not found");
 
     try {
         const workflows = await workflowService.getAllUserWorkflows(userId);
@@ -28,16 +28,16 @@ export const getWorkflow = asyncHandler(async (req: Request, res: Response) => {
 
 export const getWorkflowById = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    if(!userId) throw new CustomError(401, "User not found");
+    if (!userId) throw new CustomError(401, "User not found");
 
-    const {id} = req.params;
-    if(!id || isNaN(Number(id))) throw new CustomError(400, "Invalid workflow ID");
+    const { id } = req.params;
+    if (!id || isNaN(Number(id))) throw new CustomError(400, "Invalid workflow ID");
     const workflowId = Number(id);
 
     try {
         const workflow = await workflowService.getWorkflowById(workflowId, userId);
-        if(!workflow) throw new CustomError(404, "Workflow not found");
-        
+        if (!workflow) throw new CustomError(404, "Workflow not found");
+
         res.status(200).json(new ApiResponse(200, "Workflow fetched successfully", workflow));
     } catch (error: any) {
         throw new CustomError(500, error.message || "Failed to fetch workflow");
@@ -45,9 +45,38 @@ export const getWorkflowById = asyncHandler(async (req: Request, res: Response) 
 });
 
 export const updateWorkflowById = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) throw new CustomError(401, "User not found");
 
+    const { id } = req.params;
+    if (!id || isNaN(Number(id))) throw new CustomError(400, "Invalid workflow ID");
+    const workflowId = Number(id);
+
+    try {
+        const updatedWorkflow = await workflowService.updateWorkflowById(workflowId, userId, req.body);
+        res.status(200).json(new ApiResponse(200, "Workflow updated successfully", updatedWorkflow));
+    } catch (error: any) {
+        if (error.code === "P2025") {
+            return res
+                .status(404)
+                .json(new ApiResponse(404, "Workflow not found", null));
+        }
+        throw new CustomError(500, error.message || "Failed to update workflow");
+    }
 });
 
 export const deleteWorkflowById = asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    if(!userId) throw new CustomError(401, "User not found");
 
+    const {id} = req.params;
+    if(!id || isNaN(Number(id))) throw new CustomError(400, "Invalid workflow ID");
+    const workflowId = Number(id);
+
+    try {
+        const deletedWorkflow = await workflowService.deleteWorkflowById(workflowId, userId);
+        res.status(200).json(new ApiResponse(200, "Workflow deleted successfully", deletedWorkflow));
+    } catch (error: any) {
+        throw new CustomError(500, error.message || "Failed to delete workflow");
+    }
 });

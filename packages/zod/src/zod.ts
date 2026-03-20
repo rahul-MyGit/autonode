@@ -65,7 +65,7 @@ export const workflowSchema = z.object({
     name: z.string().min(1),
     description: z.string().optional(),
     active: z.boolean(),
-    tag: z.string().optional(),
+    tags: z.array(z.string()).optional(),
     nodes: z.array(INodeSchema),
     edges: z.array(IEdgeSchema),
 });

@@ -7,8 +7,6 @@ const router = Router();
 router.post("/save", isProtected, saveWorkflow);
 router.get("/", isProtected, getWorkflow);
 router.get("/:id" , isProtected, getWorkflowById);
-
-//Pending
 router.put("/:id" , isProtected, updateWorkflowById);
 router.delete("/:id" , isProtected, deleteWorkflowById);
 
