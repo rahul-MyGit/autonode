@@ -27,6 +27,7 @@ const worker = new Worker("workflow-queue", async (job) => {
 
         // TODO: build the whole graph
         // TODO: validate for fail fast if there's cycles
+        // TODO: Fetch the order of execution
         // TODO: Execute in Order
         // TODO: Update DB as completed
 
