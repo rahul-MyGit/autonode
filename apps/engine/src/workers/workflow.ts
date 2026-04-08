@@ -52,7 +52,32 @@ export class Workflow {
     }
 
     fetchExecutionOrder() {
+        const temporaryCopyOfDegree = new Map<string, number>(this.indegree);
+        const queue: string[] = [];
+        const orderOfExecution: string[] = [];
 
+        for ( let [node, degree] of temporaryCopyOfDegree){
+            if (degree === 0) {
+                queue.push(node);
+            }
+        }
+
+        while (queue.length > 0) {
+            const currentNodeId = queue.shift()!;
+            orderOfExecution.push(currentNodeId);
+
+            for ( let neighbor of this.adjacenctList.get(currentNodeId) ?? []) {
+                temporaryCopyOfDegree.set(neighbor, (temporaryCopyOfDegree.get(neighbor) ?? 0) - 1);
+                if (temporaryCopyOfDegree.get(neighbor) === 0) {
+                    queue.push(neighbor);
+                }
+            }
+        }
+
+        if (orderOfExecution.length !== this.nodes.size) {
+            console.log("Cycle detected");
+          }
+          return orderOfExecution;
     }
 
     executeInOrder() {
