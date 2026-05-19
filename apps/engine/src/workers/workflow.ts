@@ -9,11 +9,15 @@ export class Workflow {
     private indegree : Map<string,number>;
     private eventPublisher =  new EventPublisher();
 
+    private actionExecutor: any; //TODO: Implement the action executor
+
     constructor(executionData: WorkflowExecutionData){
         this.executionData = executionData;
         this.nodes = new Map<string, NodeData>();
         this.adjacenctList = new Map<string, string[]>();
         this.indegree = new Map<string, number>();
+
+        this.actionExecutor = new ActionExecutor(); //TODO: Implement the action executor
     }
 
     buildGraph() {
@@ -113,16 +117,18 @@ export class Workflow {
 
             const userCredMap = new Map()
             cred.forEach((cred) => {
-                userCredMap.set(cred.ApiName, cred.data);
+                userCredMap.set(cred.application , cred);
             })
+
+            this.actionExecutor.setCredentials(userCredMap); //TODO: Implement the action executor
             
         } catch (error) {
-            
+            console.error("Failed to load credentials:", error);
         }
 
     }
 
-    executeInOrder(){
+    async executeInOrder(){
         this.buildGraph()
 
         if(this.checkForCycles()){
@@ -140,10 +146,30 @@ export class Workflow {
             status: "started"
         })
 
-        //TODO: load credentials
-        //TODO: fetch execution order
+        await this.loadcredentials();
+        const executionOrder = this.fetchExecutionOrder();
+        console.log("Execution order", executionOrder);
 
+        let hasError = false;
+        for (let nodeId of executionOrder) {
+          try {
+            await this.executeNode(nodeId);
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          } catch (error) {
+            hasError = true;
+            console.error(`Workflow execution stopped at node ${nodeId}:`, error);
+            break;
+          }
+        }
 
-
+        this.eventPublisher.publish("workflow.event", {
+            executionId: this.executionData.executionJobId,
+            workflowId: this.executionData.workflow.id,
+            workflowName: this.executionData.workflow.name,
+            userId: this.executionData.userId,
+            nodeId: "workflow",
+            timeStamp: new Date(Date.now()),
+            status: hasError ? "failed" : "completed",
+          });
     }
 }
