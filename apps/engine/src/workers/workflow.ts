@@ -10,6 +10,7 @@ export class Workflow {
     private eventPublisher =  new EventPublisher();
 
     private actionExecutor: any; //TODO: Implement the action executor
+    private nodeOutputs: Map<string, any>;
 
     constructor(executionData: WorkflowExecutionData){
         this.executionData = executionData;
@@ -18,6 +19,7 @@ export class Workflow {
         this.indegree = new Map<string, number>();
 
         this.actionExecutor = new ActionExecutor(); //TODO: Implement the action executor
+        this.nodeOutputs = new Map();
     }
 
     buildGraph() {
@@ -97,10 +99,94 @@ export class Workflow {
             console.log("Node not found");
             return;
         }
-        //TODO: publish into the workflow queue
-        //TODO: figure out how it got trigger and publist it + execute it accordingly
-        //TODO: update the db with the node result
-        //TODO: return it
+        if(this.checkForCycles()){
+            this.eventPublisher.publish("workflow.event", {
+                executionId: this.executionData.executionJobId,
+                workflowId: this.executionData.workflow.id,
+                workflowName: this.executionData.workflow.name,
+                userId: this.executionData.userId,
+                nodeId: node.id,
+                timeStamp: new Date(Date.now()),
+                status: "failed"
+            })
+        }
+
+        console.log("Executing node", nodeId + " And the Type is " + node.type);
+
+        this.eventPublisher.publish("workflow.event", {
+            executionId: this.executionData.executionJobId,
+            workflowId: this.executionData.workflow.id,
+            workflowName: this.executionData.workflow.name,
+            userId: this.executionData.userId,
+            nodeId: node.id,
+            timeStamp: new Date(Date.now()),
+            status: "started",
+        });
+
+        try {
+            let output: any = null;
+
+            if(node.type === "manualtrigger"){
+                console.log("Manual trigger executed");
+
+            output = {
+                triggeredBy: "manual",
+                timestamp: new Date().toISOString(),
+                executionId: this.executionData.executionJobId,
+            };
+
+            this.nodeOutputs.set(nodeId, output);
+
+            } else if (node.type === "webhooktrigger"){
+                const triggerData = this.executionData.triggerData;
+                console.log("Trigger data", triggerData);
+
+                output = {
+                    webhookPayload: triggerData?.webhookPayload,
+                    payload: triggerData?.webhookPayload,
+                    triggerSource: triggerData?.ip,
+                    method: triggerData?.method,
+                    queryParams: triggerData?.queryParams,
+                    headers: triggerData?.headers,
+                    timestamp: new Date().toISOString(),
+                };
+
+                this.nodeOutputs.set(nodeId, output);
+            } else if (node.type === "scheduletrigger"){
+                console.log("Schedule trigger executed");
+
+        const metadata = this.executionData.metadata;
+
+        output = {
+          triggeredBy: "schedule",
+          timestamp: new Date().toISOString(),
+          executionId: this.executionData.executionId,
+          scheduledTime: metadata?.scheduledTime,
+          nodeId: metadata?.nodeId,
+        };
+
+        this.nodeOutputs.set(nodeId, output);
+            } else if (node.type === "action"){
+
+            } else {
+                //unknown
+            }
+
+            this.eventPublisher.publish("workflow.event", {
+                executionId: this.executionData.executionJobId,
+                workflowId: this.executionData.workflow.id,
+                workflowName: this.executionData.workflow.name,
+                userId: this.executionData.userId,
+                nodeId: node.id,
+                timeStamp: new Date(Date.now()),
+                status: "completed",
+                data: output,
+            });
+        } catch (error) {
+            // get error 
+            // set node output as error
+            //publist to worrkflow event
+        }
     }
 
     async loadcredentials(){

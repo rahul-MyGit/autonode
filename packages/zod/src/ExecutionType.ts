@@ -54,6 +54,15 @@ export type WorkflowDefinition = {
     edges: EdgeData[];
 };
 
+type TriggerData = {
+    nodeId?: string;
+    webhookPayload?: Record<string, unknown>;
+    queryParams?: Record<string, unknown>;
+    headers?: Record<string, unknown>;
+    method?: string;
+    ip?: string;
+    emailData?: Record<string, unknown>;
+}
 export type WorkflowExecutionData = {
     executionJobId: string;
     workflowId: number;
@@ -65,6 +74,6 @@ export type WorkflowExecutionData = {
     maxRetries?: number;
     timeout?: number;
     metadata?: ExecutionMetadata;
-    //TODO: Add trigger data
+    triggerData?: TriggerData;
     workflow: WorkflowDefinition;
 };
