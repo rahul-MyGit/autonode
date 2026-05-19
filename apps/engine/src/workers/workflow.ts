@@ -1,9 +1,13 @@
 import type { NodeData, WorkflowExecutionData } from "@n8n/zod";
+import { EventPublisher } from "../services/eventPublisher";
+import { prisma } from "@n8n/db";
+
 export class Workflow {
     private executionData: WorkflowExecutionData;
     private nodes : Map<string, NodeData>;
     private adjacenctList : Map<string, string[]>;
     private indegree : Map<string,number>;
+    private eventPublisher =  new EventPublisher();
 
     constructor(executionData: WorkflowExecutionData){
         this.executionData = executionData;
@@ -80,7 +84,57 @@ export class Workflow {
           return orderOfExecution;
     }
 
-    executeInOrder() {
+    async executeNode(nodeId: string): Promise<void> {
+        const node = this.nodes.get(nodeId);
+
+        if (!node) {
+            console.log("Node not found");
+            return;
+        }
+        //TODO: publish into the workflow queue
+        //TODO: figure out how it got trigger and publist it + execute it accordingly
+        //TODO: update the db with the node result
+        //TODO: return it
+    }
+
+    async loadcredentials(){
+        try {
+            console.log("Fetching the credentials for user");
+
+            const cred = await prisma.credentials.findMany({
+                where : {
+                    
+                }
+            })
+            
+        } catch (error) {
+            
+        }
+
+    }
+
+    executeInOrder(){
+        this.buildGraph()
+
+        if(this.checkForCycles()){
+            console.log("CYCLE DETECTED IN EXECUTEINORDER");
+            return;
+        }
+
+        this.eventPublisher.publish("execute-workflow", {
+            executionJobId : this.executionData.executionJobId,
+            workflowId : this.executionData.workflowId,
+            userId : this.executionData.userId,
+            trigger: this.executionData.triggerBy,
+            nodeId : "workflow",
+            timestamp : new Date(Date.now()),
+            status: "started"
+        })
+
+        //TODO: load credentials
+        //TODO: fetch execution order
+
+
 
     }
 }

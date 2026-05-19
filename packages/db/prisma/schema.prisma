@@ -23,8 +23,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  workflows  Workflow[]
-  executions WorkflowExecution[]
+  workflows    Workflow[]
+  executions   WorkflowExecution[]
+  creadentials Credentails[]
 }
 
 model Workflow {
@@ -74,4 +75,17 @@ model WorkflowExecution {
   @@index([workflowId])
   @@index([status])
   @@index([startedAt])
+}
+
+model Credentails {
+  id          String   @id @default(cuid())
+  data        Json
+  name        String?
+  type        String?
+  ApiName     String?
+  Application String?
+  userId      Int
+  createdAt   DateTime
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
