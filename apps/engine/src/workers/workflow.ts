@@ -232,9 +232,28 @@ export class Workflow {
                 data: output,
             });
         } catch (error) {
-            // get error 
-            // set node output as error
-            //publist to worrkflow event
+            console.error(`Error executing node ${nodeId}:`, error);
+
+            const errorOutput = {
+                error: (error as Error).message,
+                timestamp: new Date().toISOString(),
+                nodeId: nodeId,
+            };
+
+            this.nodeOutputs.set(nodeId, errorOutput);
+
+            this.eventPublisher.publish("workflow.event", {
+                executionId: this.executionData.executionJobId,
+                workflowId: this.executionData.workflow.id,
+                workflowName: this.executionData.workflow.name,
+                userId: this.executionData.userId,
+                nodeId: nodeId,
+                timeStamp: new Date(Date.now()),
+                status: "failed",
+                data: errorOutput
+            });
+
+            throw error;
         }
     }
 
