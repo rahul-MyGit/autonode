@@ -155,21 +155,70 @@ export class Workflow {
             } else if (node.type === "scheduletrigger"){
                 console.log("Schedule trigger executed");
 
-        const metadata = this.executionData.metadata;
+                const metadata = this.executionData.metadata;
 
-        output = {
-          triggeredBy: "schedule",
-          timestamp: new Date().toISOString(),
-          executionId: this.executionData.executionId,
-          scheduledTime: metadata?.scheduledTime,
-          nodeId: metadata?.nodeId,
-        };
+                const output = {
+                    triggeredBy: "schedule",
+                    timestamp: new Date().toISOString(),
+                    executionId: this.executionData.executionJobId,
+                    scheduledTime: metadata?.scheduledTime,
+                    nodeId: metadata?.nodeId,
+                };
 
-        this.nodeOutputs.set(nodeId, output);
+                this.nodeOutputs.set(nodeId, output);
             } else if (node.type === "action"){
+                if(!this.actionExecutor){
+                    await this.loadcredentials();
+                }
+                const previousOutputs = Object.fromEntries(this.nodeOutputs);
 
+                const parentEdges = this.executionData.workflow.edges.filter((edge) => edge.target === nodeId);
+
+                if(parentEdges.length > 0){
+                    const parentNodeId = parentEdges[0]!.source;
+                    const parentOutput = this.nodeOutputs.get(parentNodeId);
+
+                    if(parentOutput){
+                        previousOutputs.previousNode = parentOutput;
+                        console.log("Previous outputs", previousOutputs);
+                    }
+                }
+
+                console.log("Current Node:" + nodeId + " " + node.data.actionType);
+                console.log("got data from previous node");
+
+                if(Object.keys(previousOutputs).length === 0){
+                    console.log("No previous node output found");
+                }else{
+                    for ( const [nodeId, nodeOutput] of Object.entries(previousOutputs)){
+                        console.log("Node ID:" + nodeId + " " + nodeOutput);
+                        if(nodeOutput && typeof nodeOutput === "object"){
+                            const keys = Object.keys(nodeOutput);
+
+                            if('content' in nodeOutput){
+                                const preview = String(output.content).substring(0, 100);
+                                console.log(`content : ${preview}${String(nodeOutput.content).length > 100 ? "..." : ""}`);
+                            }
+                        }
+                    }
+                }
+                
+                console.log(`Executing action: ${node.data.actionType}`);
+
+                output = await this.actionExecutor.executeAction(node, previousOutputs);
+                this.nodeOutputs.set(nodeId, output);
+
+                console.log("\nAction completed successfully");
+                console.log(" Output stored for node:", nodeId);
+
+                console.log(`Action ${node.data.actionType} completed:`, output);
             } else {
                 //unknown
+                console.log(`Unknown node type: ${node.type}`);
+                output = {
+                    error: `Unknown node type: ${node.type}`,
+                    timestamp: new Date().toISOString(),
+                };
             }
 
             this.eventPublisher.publish("workflow.event", {
