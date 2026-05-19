@@ -2,6 +2,7 @@
   "name": "n8n",
   "private": true,
   "scripts": {
+    "start:backend": "bun run --watch apps/backend/src/index.ts",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",

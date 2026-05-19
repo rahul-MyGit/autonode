@@ -37,6 +37,7 @@
     "apps/engine": {
       "name": "engine",
       "dependencies": {
+        "bullmq": "^5.71.0",
         "express": "^5.2.1",
       },
       "devDependencies": {
