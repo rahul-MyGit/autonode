@@ -84,6 +84,8 @@ export class Workflow {
           return orderOfExecution;
     }
 
+
+
     async executeNode(nodeId: string): Promise<void> {
         const node = this.nodes.get(nodeId);
 
@@ -101,10 +103,17 @@ export class Workflow {
         try {
             console.log("Fetching the credentials for user");
 
-            const cred = await prisma.credentials.findMany({
+            const cred = await prisma.credentails.findMany({
                 where : {
-                    
+                    userId : this.executionData.userId,
                 }
+            })
+
+            console.log("Credentials fetched", cred);
+
+            const userCredMap = new Map()
+            cred.forEach((cred) => {
+                userCredMap.set(cred.ApiName, cred.data);
             })
             
         } catch (error) {

@@ -82,8 +82,8 @@ model Credentails {
   data        Json
   name        String?
   type        String?
-  ApiName     String?
-  Application String?
+  apiName     String?
+  application String?
   userId      Int
   createdAt   DateTime
   updatedAt   DateTime @updatedAt
